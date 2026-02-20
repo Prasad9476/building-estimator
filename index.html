@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Building Planner</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 40px; }
+        
+        /* Template Cards */
+        .template-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .t-card { background: #fff; border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .t-card:hover { border-color: #3498db; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2); }
+        .t-card h3 { margin: 10px 0 5px; color: #2980b9; }
+        .t-card.selected { border-color: #27ae60; background: #e8f8f5; }
+
+        /* Form Styling */
+        .section-title { font-size: 1.2em; font-weight: bold; border-bottom: 2px solid #eee; padding-bottom: 10px; margin: 30px 0 20px; color: #34495e; }
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .form-group label { display: block; font-size: 0.9em; margin-bottom: 5px; font-weight: 500; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        
+        .btn-submit { width: 100%; background: #2c3e50; color: white; border: none; padding: 15px; font-size: 1.1em; border-radius: 6px; cursor: pointer; margin-top: 30px; transition: 0.3s; }
+        .btn-submit:hover { background: #34495e; }
+
+        /* Advanced Toggle */
+        .advanced-toggle { text-align: center; margin-top: 20px; cursor: pointer; color: #3498db; text-decoration: underline; }
+        #advanced-section { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏗️ Project Estimator & Planner</h1>
+    <p class="subtitle">Select a template below to auto-fill technical details, then customize.</p>
+
+    <div class="template-grid">
+        <div class="t-card" onclick="selectTemplate('small')">
+            <h3>🏠 Small House</h3>
+            <p>1 Floor (Ground only)<br>Load Bearing Structure<br>800-1000 sq.ft</p>
+        </div>
+        <div class="t-card" onclick="selectTemplate('villa')">
+            <h3>🏡 Family Villa</h3>
+            <p>2 Floors (G+1)<br>RCC Framed Structure<br>1500-2500 sq.ft</p>
+        </div>
+        <div class="t-card" onclick="selectTemplate('commercial')">
+            <h3>🏢 Commercial</h3>
+            <p>3 Floors (G+2)<br>Heavy RCC Grid<br>3000+ sq.ft</p>
+        </div>
+    </div>
+
+    <form action="/estimate" method="post" id="mainForm">
+        
+        <div class="section-title">1. Plot & Dimensions</div>
+        <div class="input-grid">
+            <div class="form-group">
+                <label>Plot Length (ft)</label>
+                <input type="number" name="plot_length" value="40" required>
+            </div>
+            <div class="form-group">
+                <label>Plot Width (ft)</label>
+                <input type="number" name="plot_width" value="30" required>
+            </div>
+            <div class="form-group">
+                <label>Floors</label>
+                <input type="number" name="num_floors" id="num_floors" value="1" required>
+            </div>
+             <div class="form-group">
+                <label>Floor Height (ft)</label>
+                <input type="number" name="floor_height" value="10" required>
+            </div>
+        </div>
+
+        <div class="advanced-toggle" onclick="toggleAdvanced()">⚙️ Show/Hide Advanced Engineering Details</div>
+        
+        <div id="advanced-section">
+            <div class="section-title">2. Structure & Concrete</div>
+            <div class="input-grid">
+                <div class="form-group"><label>Slab Area (sq.ft)</label><input type="number" name="slab_area" id="slab_area" value="1000"></div>
+                <div class="form-group"><label>Column Count</label><input type="number" name="num_columns" id="num_columns" value="12"></div>
+                <div class="form-group"><label>Beam Length (Total ft)</label><input type="number" name="total_beam_length" id="total_beam_length" value="300"></div>
+                <div class="form-group"><label>Footing Count</label><input type="number" name="num_footings" id="num_footings" value="12"></div>
+                
+                <input type="hidden" name="footing_length" value="4">
+                <input type="hidden" name="footing_width" value="4">
+                <input type="hidden" name="footing_depth" value="5">
+                <input type="hidden" name="column_length" value="9">
+                <input type="hidden" name="column_width" value="12">
+                <input type="hidden" name="column_height" value="10">
+                <input type="hidden" name="beam_width" value="9">
+                <input type="hidden" name="beam_depth" value="12">
+                <input type="hidden" name="slab_thickness" value="5">
+            </div>
+
+            <div class="section-title">3. Walls & Finishing</div>
+            <div class="input-grid">
+                <div class="form-group"><label>Ext. Wall Length (ft)</label><input type="number" name="external_wall_length" id="ext_wall" value="150"></div>
+                <div class="form-group"><label>Int. Wall Length (ft)</label><input type="number" name="internal_wall_length" id="int_wall" value="100"></div>
+                <div class="form-group"><label>Wall Thickness (in)</label><input type="number" name="wall_thickness" value="9"></div>
+                <div class="form-group"><label>Wall Height (ft)</label><input type="number" name="wall_height" value="10"></div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-submit">Generate Estimates & Plan</button>
+    </form>
+</div>
+
+<script>
+    function toggleAdvanced() {
+        var x = document.getElementById("advanced-section");
+        x.style.display = x.style.display === "block" ? "none" : "block";
+    }
+
+    function selectTemplate(type) {
+        // Visual feedback
+        document.querySelectorAll('.t-card').forEach(c => c.classList.remove('selected'));
+        event.currentTarget.classList.add('selected');
+
+        // Logic
+        if(type === 'small') {
+            setVals(1, 9, 200, 1000, 140, 80);
+        } else if(type === 'villa') {
+            setVals(2, 16, 450, 1500, 180, 150);
+        } else if(type === 'commercial') {
+            setVals(3, 24, 800, 2400, 250, 300);
+        }
+    }
+
+    function setVals(floors, cols, beam, slab, extW, intW) {
+        document.getElementById('num_floors').value = floors;
+        document.getElementById('num_columns').value = cols;
+        document.getElementById('num_footings').value = cols;
+        document.getElementById('total_beam_length').value = beam;
+        document.getElementById('slab_area').value = slab;
+        document.getElementById('ext_wall').value = extW;
+        document.getElementById('int_wall').value = intW;
+    }
+</script>
+
+</body>
+</html>

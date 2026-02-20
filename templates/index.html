@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Building Planner & Estimator</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1, h2 { color: #2c3e50; }
+        .section { margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9em; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .template-card { background: #e3f2fd; padding: 15px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; text-align: center; }
+        .template-card:hover { border-color: #2196f3; }
+        .btn { background: #27ae60; color: white; border: none; padding: 15px 30px; font-size: 1.1em; border-radius: 5px; cursor: pointer; width: 100%; }
+        .btn:hover { background: #219150; }
+        .hidden-advanced { display: none; }
+        .toggle-link { color: #3498db; cursor: pointer; text-decoration: underline; display: block; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏗️ Building Planner & Estimator</h1>
+    <p>Select a template to auto-fill estimates, then customize as needed.</p>
+
+    <div class="section">
+        <h2>1. Choose a Base Template</h2>
+        <div class="grid">
+            <div class="template-card" onclick="loadTemplate('small_house')">
+                <h3>🏠 Small House</h3>
+                <p>1 Floor, Load Bearing</p>
+            </div>
+            <div class="template-card" onclick="loadTemplate('family_villa')">
+                <h3>🏡 Family Villa</h3>
+                <p>2 Floors, RCC Framed</p>
+            </div>
+            <div class="template-card" onclick="loadTemplate('commercial')">
+                <h3>🏢 Commercial</h3>
+                <p>3 Floors, Heavy RCC</p>
+            </div>
+        </div>
+    </div>
+
+    <form action="/estimate" method="post" id="estimateForm">
+        <div class="section">
+            <h2>2. Plot & Dimensions</h2>
+            <div class="grid">
+                <div><label>Plot Length (ft)</label><input type="number" name="plot_length" value="40" required></div>
+                <div><label>Plot Width (ft)</label><input type="number" name="plot_width" value="30" required></div>
+                <div><label>Number of Floors</label><input type="number" name="num_floors" value="1" required></div>
+                <div><label>Floor Height (ft)</label><input type="number" name="floor_height" value="10" required></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>3. Structural Details</h2>
+            <span class="toggle-link" onclick="toggleAdvanced()">Show/Hide Advanced Engineering Inputs</span>
+            
+            <div class="grid hidden-advanced" id="advanced-inputs" style="margin-top: 15px;">
+                <div><label>Structure Type</label>
+                    <select name="structure_type"><option value="rcc_framed">RCC Framed</option><option value="load_bearing">Load Bearing</option></select>
+                </div>
+                <div><label>Footing Type</label>
+                    <select name="footing_type"><option value="isolated">Isolated</option><option value="combined">Combined</option></select>
+                </div>
+                <div><label>No. of Footings</label><input type="number" name="num_footings" value="12"></div>
+                <div><label>Footing Length (ft)</label><input type="number" name="footing_length" value="4"></div>
+                <div><label>Footing Width (ft)</label><input type="number" name="footing_width" value="4"></div>
+                <div><label>Footing Depth (ft)</label><input type="number" name="footing_depth" value="5"></div>
+                <div><label>PCC Thickness (in)</label><input type="number" name="pcc_thickness" value="4"></div>
+
+                <div><label>No. of Columns</label><input type="number" name="num_columns" value="12"></div>
+                <div><label>Column Length (in)</label><input type="number" name="column_length" value="9"></div>
+                <div><label>Column Width (in)</label><input type="number" name="column_width" value="12"></div>
+                <div><label>Column Height (ft)</label><input type="number" name="column_height" value="10"></div>
+                
+                <div><label>Total Beam Length (ft)</label><input type="number" name="total_beam_length" value="300"></div>
+                <div><label>Beam Width (in)</label><input type="number" name="beam_width" value="9"></div>
+                <div><label>Beam Depth (in)</label><input type="number" name="beam_depth" value="12"></div>
+
+                <div><label>Slab Area (sq.ft)</label><input type="number" name="slab_area" value="1200"></div>
+                <div><label>Slab Thickness (in)</label><input type="number" name="slab_thickness" value="5"></div>
+                <div><label>Ext. Wall Length (ft)</label><input type="number" name="external_wall_length" value="140"></div>
+                <div><label>Int. Wall Length (ft)</label><input type="number" name="internal_wall_length" value="100"></div>
+                <div><label>Wall Thickness (in)</label><input type="number" name="wall_thickness" value="9"></div>
+                <div><label>Wall Height (ft)</label><input type="number" name="wall_height" value="10"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>4. Finishing & Quality</h2>
+            <div class="grid">
+                <div><label>Flooring Area (sq.ft)</label><input type="number" name="flooring_area" value="1000"></div>
+                <div><label>Tile Size (inch)</label><input type="number" name="tile_size" value="24"></div>
+                <div><label>Paint Coats</label><input type="number" name="paint_coats" value="2"></div>
+                <div><label>Concrete Grade</label>
+                    <select name="concrete_grade"><option value="m20">M20 (Standard)</option><option value="m25">M25 (Strong)</option></select>
+                </div>
+                <div><label>Mortar Mix</label>
+                    <select name="mortar_mix"><option value="1:6">1:6 (Standard)</option><option value="1:4">1:4 (Rich)</option></select>
+                </div>
+            </div>
+            <input type="hidden" name="paint_type" value="emulsion">
+            <input type="hidden" name="cement_type" value="ppc">
+            <input type="hidden" name="internal_plaster_thickness" value="0.5">
+            <input type="hidden" name="external_plaster_thickness" value="0.75">
+        </div>
+
+        <button type="submit" class="btn">Generate Estimates, Plans & Schedule</button>
+    </form>
+</div>
+
+<script>
+    function toggleAdvanced() {
+        const adv = document.getElementById('advanced-inputs');
+        adv.style.display = adv.style.display === 'none' ? 'grid' : 'none';
+    }
+
+    // This makes the templates work!
+    const templates = {
+        'small_house': { floors: 1, cols: 9, beam_len: 200, slab: 800, type: 'load_bearing' },
+        'family_villa': { floors: 2, cols: 14, beam_len: 450, slab: 1200, type: 'rcc_framed' },
+        'commercial': { floors: 3, cols: 20, beam_len: 800, slab: 2000, type: 'rcc_framed' }
+    };
+
+    function loadTemplate(type) {
+        const t = templates[type];
+        const f = document.forms['estimateForm'];
+        
+        f['num_floors'].value = t.floors;
+        f['num_columns'].value = t.cols;
+        f['total_beam_length'].value = t.beam_len;
+        f['slab_area'].value = t.slab;
+        f['structure_type'].value = t.type;
+        
+        // Auto-calculate rough beam/wall lengths based on slab area for better UX
+        f['external_wall_length'].value = Math.sqrt(t.slab) * 4; 
+        f['internal_wall_length'].value = Math.sqrt(t.slab) * 3;
+        f['flooring_area'].value = t.slab * 0.9;
+        
+        alert("Template loaded! You can now customize specific values.");
+    }
+</script>
+
+</body>
+</html>
